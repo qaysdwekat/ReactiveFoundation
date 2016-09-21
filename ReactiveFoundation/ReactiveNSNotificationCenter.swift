@@ -25,9 +25,9 @@
 import ReactiveKit
 import Foundation
 
-extension NSNotificationCenter {
+extension NotificationCenter {
   
-  public func rNotification(name: String, object: AnyObject?) -> Stream<NSNotification> {
+  public func rNotification(_ name: String, object: AnyObject?) -> Stream {
     return create { sink in
       let subscription = NSNotificationCenter.defaultCenter().addObserverForName(name, object: object, queue: nil, usingBlock: { notification in
         sink(notification)

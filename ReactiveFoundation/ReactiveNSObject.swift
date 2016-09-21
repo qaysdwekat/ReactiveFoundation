@@ -27,13 +27,13 @@ import Foundation
 
 public extension NSObject {
   
-  private struct AssociatedKeys {
+  fileprivate struct AssociatedKeys {
     static var DisposeBagKey = "r_DisposeBagKey"
     static var AssociatedObservablesKey = "r_AssociatedObservablesKey"
   }
   
   public var rBag: DisposeBag {
-    if let disposeBag: AnyObject = objc_getAssociatedObject(self, &AssociatedKeys.DisposeBagKey) {
+    if let disposeBag: AnyObject = objc_getAssociatedObject(self, &AssociatedKeys.DisposeBagKey) as AnyObject? {
       return disposeBag as! DisposeBag
     } else {
       let disposeBag = DisposeBag()
@@ -42,15 +42,15 @@ public extension NSObject {
     }
   }
   
-  @warn_unused_result
-  public func rValueForKeyPath<T>(keyPath: String, sendInitial: Bool = true, retainStrongly: Bool = true) -> RKKeyValueObservable<T> {
+  
+  public func rValueForKeyPath<T>(_ keyPath: String, sendInitial: Bool = true, retainStrongly: Bool = true) -> RKKeyValueObservable<T> {
     return RKKeyValueObservable(keyPath: keyPath, ofObject: self, sendInitial: sendInitial, retainStrongly: retainStrongly) { (object: AnyObject?) -> T? in
       return object as? T
     }
   }
   
-  @warn_unused_result
-  public func rValueForKeyPath<T: OptionalType>(keyPath: String, sendInitial: Bool = true, retainStrongly: Bool = true) -> RKKeyValueObservable<T> {
+  
+  public func rValueForKeyPath<T: OptionalType>(_ keyPath: String, sendInitial: Bool = true, retainStrongly: Bool = true) -> RKKeyValueObservable<T> {
     return RKKeyValueObservable(keyPath: keyPath, ofObject: self, sendInitial: sendInitial, retainStrongly: retainStrongly) { (object: AnyObject?) -> T? in
       if object == nil {
         return T()
@@ -76,7 +76,7 @@ public extension NSObject {
     }
   }
   
-  public func rAssociatedObservableForValueForKey<T>(key: String, initial: T? = nil, set: (T -> ())? = nil) -> Observable<T> {
+  public func rAssociatedObservableForValueForKey<T>(_ key: String, initial: T? = nil, set: ((T) -> ())? = nil) -> Observable<T> {
     if let observable: AnyObject = r_associatedObservables[key] {
       return observable as! Observable<T>
     } else {
@@ -100,7 +100,7 @@ public extension NSObject {
     }
   }
   
-  public func rAssociatedObservableForValueForKey<T: OptionalType>(key: String, initial: T? = nil, set: (T -> ())? = nil) -> Observable<T> {
+  public func rAssociatedObservableForValueForKey<T: OptionalType>(_ key: String, initial: T? = nil, set: ((T) -> ())? = nil) -> Observable<T> {
     if let observable: AnyObject = r_associatedObservables[key] {
       return observable as! Observable<T>
     } else {
