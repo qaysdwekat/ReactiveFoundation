@@ -25,18 +25,18 @@
 import ReactiveKit
 import Foundation
 
-public class RKKeyValueObservable<T>: NSObject, StreamType {
-  private var strongObject: NSObject? = nil
-  private weak var object: NSObject? = nil
-  private var context = 0
-  private var keyPath: String
-  private var options: NSKeyValueObservingOptions
-  private var observer: (T -> ())? = nil
-  private let transform: AnyObject? -> T?
+open class RKKeyValueObservable<T>: NSObject, StreamType {
+  fileprivate var strongObject: NSObject? = nil
+  fileprivate weak var object: NSObject? = nil
+  fileprivate var context = 0
+  fileprivate var keyPath: String
+  fileprivate var options: NSKeyValueObservingOptions
+  fileprivate var observer: ((T) -> ())? = nil
+  fileprivate let transform: (AnyObject?) -> T?
   
-  internal init(keyPath: String, ofObject object: NSObject, sendInitial: Bool, retainStrongly: Bool, transform: AnyObject? -> T?) {
+  internal init(keyPath: String, ofObject object: NSObject, sendInitial: Bool, retainStrongly: Bool, transform: @escaping (AnyObject?) -> T?) {
     self.keyPath = keyPath
-    self.options = sendInitial ? NSKeyValueObservingOptions.New.union(.Initial) : .New
+    self.options = sendInitial ? NSKeyValueObservingOptions.new.union(.initial) : .new
     self.transform = transform
     super.init()
     
@@ -46,10 +46,10 @@ public class RKKeyValueObservable<T>: NSObject, StreamType {
     }
   }
   
-  public override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+  open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
     if context == &self.context {
-      if let newValue = change?[NSKeyValueChangeNewKey] {
-        if let newValue = transform(newValue) {
+      if let newValue = change?[NSKeyValueChangeKey.newKey] {
+        if let newValue = transform(newValue as AnyObject?) {
           observer?(newValue)
         } else {
           fatalError("Value [\(newValue)] not convertible to \(T.self) type!")
@@ -58,12 +58,12 @@ public class RKKeyValueObservable<T>: NSObject, StreamType {
         // no new value - ignore
       }
     } else {
-      super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
+      super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
     }
   }
   
-  @warn_unused_result(message = "Key-Value observing is active as long as the disposable is alive and not disposed! Please store this disposable somewhere.")
-  public func observe(on context: ExecutionContext? = nil, observer: T -> ()) -> DisposableType {
+  
+  open func observe(on context: ExecutionContext? = nil, observer: @escaping (T) -> ()) -> DisposableType {
     
     if self.observer == nil {
 
